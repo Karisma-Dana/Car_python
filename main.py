@@ -8,7 +8,7 @@ testing
 
 GRASS =  scale_image( pygame.image.load("imgs/grass.jpg"), 2.5)
 TRACK = scale_image(pygame.image.load("imgs/track.png"), 0.9)
-
+``
 TRACK_BORDER =  scale_image(pygame.image.load("imgs/track-border.png"),0.9)
 FINISH =  pygame.image.load("imgs/finish.png")
 
