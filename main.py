@@ -1,7 +1,7 @@
 import pygame
 import math
 import time 
-from utils import scale_image
+from utils import scale_image, blit_rotate_center
 
 
 
@@ -23,10 +23,13 @@ pygame.display.set_caption("Racing Game!")
 FPS = 60
 class AbstracktCar:
     def __init__(self,max_vel,rotation_vel):
+        self.img = self.IMG
         self.max_vel = max_vel
         self.vel = 0
         self.rotation_vel = rotation_vel
-        self.angel = 0 
+        self.angel = 0
+        self.x, self.y = self.START_POS
+        self.acceleration = 0.1
 
     def rotate(self,left=False, right=False):
         if left:
@@ -34,13 +37,43 @@ class AbstracktCar:
         elif right:
             self.angel -= self.rotation_vel
 
+    def draw(self,win):
+        blit_rotate_center(win,self.img,(self.x, self.y), self.angel)
+    
+    def move_forward(self):
+        self.vel = min(self.vel + self.acceleration, self.max_vel)
+        self.move()
+    
+    def move(self):
+        radians = math.radians(self.angel)
+        print(radians )
+        vertical = math.cos(radians) * self.vel
+        horizontal = math.sin(radians) * self.vel
+
+
+        print(vertical,horizontal)
+        self.y -=vertical
+        self.x -=horizontal
+
+    def reduce_speed(self):
+        self.vel = max(self.vel - self.acceleration/2, 0 )
+        self.move()
 
 
 
 
-def draw(win,images):
+class PlayerCar(AbstracktCar):
+    IMG = RED_CAR
+    START_POS = (180,200)
+
+
+def draw(win,images, player_car):
     for img, pos in images:
         win.blit(img,pos)
+    player_car.draw(win)
+
+    pygame.display.update()
+
     
 
 
@@ -48,16 +81,31 @@ run = True
 clock = pygame.time.Clock()
 
 images = [(GRASS,(0,0)), (TRACK,(0,0))]
+player_car = PlayerCar(4,3 )
+
 
 while run :
     clock.tick(FPS)
-    draw(WIN,images)
-    pygame.display.update()
+    draw(WIN,images,player_car)
+    
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
             break
 
+    keys = pygame.key.get_pressed()
+    move = False
 
+    if keys[pygame.K_a]:
+        player_car.rotate(left=True)
+    if keys[pygame.K_d]:
+        player_car.rotate(right=True)
+    if keys[pygame.K_w]:
+        move = True
+        player_car.move_forward()
+    
+    if not move:
+        player_car.reduce_speed()
+pygame.quit()
 
