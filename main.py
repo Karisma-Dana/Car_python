@@ -10,6 +10,7 @@ GRASS =  scale_image( pygame.image.load("imgs/grass.jpg"), 2.5)
 TRACK = scale_image(pygame.image.load("imgs/track.png"), 0.9)
 ``
 TRACK_BORDER =  scale_image(pygame.image.load("imgs/track-border.png"),0.9)
+MASK_TRACK_BORDER = pygame.mask.from_surface(TRACK_BORDER)
 FINISH =  pygame.image.load("imgs/finish.png")
 
 GREEN_CAR = scale_image(pygame.image.load("imgs/green-car.png"), 0.55)
@@ -44,27 +45,38 @@ class AbstracktCar:
         self.vel = min(self.vel + self.acceleration, self.max_vel)
         self.move()
     
+    def move_backward(self):
+        self.vel = max(self.vel - self.acceleration, -self.max_vel/2)
+        self.move()
+    
     def move(self):
         radians = math.radians(self.angel)
-        print(radians )
         vertical = math.cos(radians) * self.vel
         horizontal = math.sin(radians) * self.vel
-
-
-        print(vertical,horizontal)
         self.y -=vertical
         self.x -=horizontal
+    
+    def collide(self,mask, x = 0, y = 0):
+        car_mask = pygame.mask.from_surface(self.img)
+        offset = (int(self.x - x),int(self.y - y))
+        poi = mask.overlap(car_mask,offset)
 
-    def reduce_speed(self):
-        self.vel = max(self.vel - self.acceleration/2, 0 )
-        self.move()
-
+        return poi
 
 
 
 class PlayerCar(AbstracktCar):
     IMG = RED_CAR
     START_POS = (180,200)
+    
+    def reduce_speed(self):
+        self.vel = max(self.vel - self.acceleration/2, 0 )
+        self.move()
+
+    def bounce(self):
+        self.vel = -self.vel/1.5
+        self.move()
+
 
 
 def draw(win,images, player_car):
@@ -74,6 +86,24 @@ def draw(win,images, player_car):
 
     pygame.display.update()
 
+def move(player_car):
+    keys = pygame.key.get_pressed()
+    move = False
+
+    if keys[pygame.K_a]:
+        player_car.rotate(left=True)
+    if keys[pygame.K_d]:
+        player_car.rotate(right=True)
+    if keys[pygame.K_w]:
+        move = True
+        player_car.move_forward()
+    if keys[pygame.K_s]:
+        move = True
+        player_car.move_backward()
+    
+    if not move:
+        player_car.reduce_speed()
+
     
 
 
@@ -81,7 +111,7 @@ run = True
 clock = pygame.time.Clock()
 
 images = [(GRASS,(0,0)), (TRACK,(0,0))]
-player_car = PlayerCar(4,3 )
+player_car = PlayerCar(4,3)
 
 
 while run :
@@ -94,18 +124,9 @@ while run :
             run = False
             break
 
-    keys = pygame.key.get_pressed()
-    move = False
+    move(player_car)
 
-    if keys[pygame.K_a]:
-        player_car.rotate(left=True)
-    if keys[pygame.K_d]:
-        player_car.rotate(right=True)
-    if keys[pygame.K_w]:
-        move = True
-        player_car.move_forward()
-    
-    if not move:
-        player_car.reduce_speed()
+    if player_car.collide(MASK_TRACK_BORDER):
+        player_car.bounce()
 pygame.quit()
 
