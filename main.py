@@ -3,12 +3,10 @@ import math
 import time 
 from utils import scale_image, blit_rotate_center
 
-testing
 
 
 GRASS =  scale_image( pygame.image.load("imgs/grass.jpg"), 2.5)
 TRACK = scale_image(pygame.image.load("imgs/track.png"), 0.9)
-``
 TRACK_BORDER =  scale_image(pygame.image.load("imgs/track-border.png"),0.9)
 MASK_TRACK_BORDER = pygame.mask.from_surface(TRACK_BORDER)
 FINISH =  pygame.image.load("imgs/finish.png")
@@ -129,5 +127,3 @@ while run :
     if player_car.collide(MASK_TRACK_BORDER):
         player_car.bounce()
 pygame.quit()
-
-testing
