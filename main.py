@@ -10,6 +10,8 @@ TRACK = scale_image(pygame.image.load("imgs/track.png"), 0.9)
 TRACK_BORDER =  scale_image(pygame.image.load("imgs/track-border.png"),0.9)
 MASK_TRACK_BORDER = pygame.mask.from_surface(TRACK_BORDER)
 FINISH =  pygame.image.load("imgs/finish.png")
+MASK_FINISH = pygame.mask.from_surface(FINISH)
+FINISH_POSITION = (130,250)
 
 GREEN_CAR = scale_image(pygame.image.load("imgs/green-car.png"), 0.55)
 RED_CAR = scale_image(pygame.image.load("imgs/red-car.png"), 0.55)
@@ -60,6 +62,11 @@ class AbstracktCar:
         poi = mask.overlap(car_mask,offset)
 
         return poi
+    
+    def reset(self):
+        self.x, self.y = self.START_POS
+        self.vel = 0
+        self.angel = 0
 
 
 
@@ -74,6 +81,9 @@ class PlayerCar(AbstracktCar):
     def bounce(self):
         self.vel = -self.vel/1.5
         self.move()
+
+    
+
 
 
 
@@ -108,7 +118,7 @@ def move(player_car):
 run = True
 clock = pygame.time.Clock()
 
-images = [(GRASS,(0,0)), (TRACK,(0,0))]
+images = [(GRASS,(0,0)), (TRACK,(0,0)), (FINISH,(FINISH_POSITION)), (TRACK_BORDER,(0,0))]
 player_car = PlayerCar(4,3)
 
 
@@ -124,6 +134,17 @@ while run :
 
     move(player_car)
 
-    if player_car.collide(MASK_TRACK_BORDER):
+    if player_car.collide(MASK_TRACK_BORDER ) != None:
         player_car.bounce()
+    
+    finish_poi_collide = player_car.collide(MASK_FINISH, *FINISH_POSITION)
+    if finish_poi_collide != None:
+        if finish_poi_collide[1] == 0:
+            player_car.bounce()
+        else:
+            print("finish")
+            player_car.reset()
+            
+        
+        print
 pygame.quit()
